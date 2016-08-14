@@ -20,23 +20,44 @@ def roll_dice(num_rolls, dice=six_sided):
     # BEGIN PROBLEM 1
     "*** REPLACE THIS LINE ***"
     times = num_rolls
-    score = 0
+    final = 0
+    pigout = 0
     while (times > 0):
-        outcome = randint(1, dice)
+        outcome = dice()
         if outcome == 1:
-            return 1
-        score += outcome
-    return score
+            pigout = 1
+        final += outcome
+        times -= 1
+    return pigout if pigout == 1 else final
     # END PROBLEM 1
 
 
 def free_bacon(opponent_score):
     """Return the points scored from rolling 0 dice (Free Bacon)."""
     # BEGIN PROBLEM 2
-    "*** REPLACE THIS LINE ***"
+    return 1 + max(opponent_score // 10, opponent_score % 10)
+
     # END PROBLEM 2
 
 # Write your prime functions here!
+def is_prime(n):
+    if n == 1:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+    for i in range(3, int(n**0.5+1), 2):
+        if n % i == 0:
+            return False
+    return True
+
+def next_prime(n):
+    result = n + 1
+    while is_prime(result) != True:
+        result += 1
+    return result
+
 
 def take_turn(num_rolls, opponent_score, dice=six_sided):
     """Simulate a turn rolling NUM_ROLLS dice, which may be 0 (Free Bacon).
@@ -52,6 +73,13 @@ def take_turn(num_rolls, opponent_score, dice=six_sided):
     assert opponent_score < 100, 'The game should be over.'
     # BEGIN PROBLEM 2
     "*** REPLACE THIS LINE ***"
+    if num_rolls == 0:
+        score = free_bacon(opponent_score)
+    else:
+        score = roll_dice(num_rolls,dice)
+    if is_prime(score):
+        score = next_prime(score)
+    return score
     # END PROBLEM 2
 
 
@@ -61,6 +89,10 @@ def select_dice(score, opponent_score):
     """
     # BEGIN PROBLEM 3
     "*** REPLACE THIS LINE ***"
+    if (score + opponent_score) % 7 == 0:
+        return four_sided
+    else:
+        return six_sided
     # END PROBLEM 3
 
 def max_dice(score, opponent_score):
@@ -70,6 +102,10 @@ def max_dice(score, opponent_score):
     """
     # BEGIN PROBLEM 3
     "*** REPLACE THIS LINE ***"
+    if int(str(score + opponent_score)[-1]) == 7:
+        return 1
+    else:
+        return 10
     # END PROBLEM 3
 
 
@@ -78,6 +114,7 @@ def is_swap(score):
     """
     # BEGIN PROBLEM 4
     "*** REPLACE THIS LINE ***"
+    return len(set(str(score))) == 1
     # END PROBLEM 4
 
 
@@ -108,6 +145,26 @@ def play(strategy0, strategy1, score0=0, score1=0, goal=GOAL_SCORE):
     player = 0  # Which player is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** REPLACE THIS LINE ***"
+    while(score0 < goal and score1 < goal):
+        if player == 0:
+            num_rolls = strategy0(score0, score1)
+            dice = select_dice(score0, score1)
+            score = take_turn(num_rolls, score1, dice)
+            score0 += score
+            if is_swap(score0):
+                temp = score0
+                score0 = score1
+                score1 = temp
+        elif player == 1:
+            num_rolls = strategy1(score1, score0)
+            dice = select_dice(score0, score1)
+            score = take_turn(num_rolls, score0, dice)
+            score1 += score
+            if is_swap(score1):
+                temp = score1
+                score1 = score0
+                score0 = temp
+        player = other(player)
     # END PROBLEM 5
     return score0, score1
 
@@ -191,6 +248,14 @@ def check_strategy(strategy, goal=GOAL_SCORE):
     """
     # BEGIN PROBLEM 6
     "*** REPLACE THIS LINE ***"
+    
+    for i in range(goal+1):
+        for j in range(goal+1):
+            score = i
+            opponent_score = j
+            num_rolls = strategy(score, opponent_score)
+            check_strategy_roll(score, opponent_score, num_rolls)
+        
     # END PROBLEM 6
     return strategy
 
@@ -209,6 +274,12 @@ def make_averaged(fn, num_samples=1000):
     """
     # BEGIN PROBLEM 7
     "*** REPLACE THIS LINE ***"
+    def averaged(*args):
+        total = 0
+        for i in range(1000):
+            total += fn(*args)
+        return total/num_samples
+    return averaged
     # END PROBLEM 7
 
 
@@ -223,6 +294,16 @@ def max_scoring_num_rolls(dice=six_sided, num_samples=1000):
     """
     # BEGIN PROBLEM 8
     "*** REPLACE THIS LINE ***"
+    max_average = 0
+    number = 0
+    for i in range(1, 11):
+        num_rolls = i
+        averaged_dice = make_averaged(roll_dice, num_samples)(num_rolls, dice)
+        if averaged_dice > max_average:
+            max_average = averaged_dice
+            number = num_rolls
+    return number
+
     # END PROBLEM 8
 
 
@@ -245,7 +326,7 @@ def average_win_rate(strategy, baseline=always_roll(6)):
 
 def run_experiments():
     """Run a series of strategy experiments and report results."""
-    if True:  # Change to False when done finding max_scoring_num_rolls
+    if False:  # Change to False when done finding max_scoring_num_rolls
         six_sided_max = max_scoring_num_rolls(six_sided)
         print('Max scoring num rolls for six-sided dice:', six_sided_max)
         four_sided_max = max_scoring_num_rolls(four_sided)
@@ -261,6 +342,8 @@ def run_experiments():
         print('swap_strategy win rate:', average_win_rate(swap_strategy))
 
     "*** You may add additional experiments as you wish ***"
+    if True:  # Change to True to test swap_strategy
+        print('final_strategy win rate:', average_win_rate(swap_strategy))
 
 
 # Strategies
@@ -272,7 +355,12 @@ def bacon_strategy(score, opponent_score, margin=8, num_rolls=6):
     """
     # BEGIN PROBLEM 9
     "*** REPLACE THIS LINE ***"
-    return 6  # Replace this statement
+    the_score = free_bacon(opponent_score)
+    if is_prime(the_score):
+        the_score = next_prime(the_score)
+    if the_score >= margin:
+        return 0
+    return num_rolls
     # END PROBLEM 9
 
 
@@ -284,7 +372,13 @@ def swap_strategy(score, opponent_score, margin=5, num_rolls=6):
     """
     # BEGIN PROBLEM 10
     "*** REPLACE THIS LINE ***"
-    return 6  # Replace this statement
+    the_score = free_bacon(opponent_score)
+    if is_prime(the_score):
+        the_score = next_prime(the_score)
+    new_score = score + the_score
+    if (is_swap(new_score) or (the_score >= margin)) and opponent_score > score:
+        return 0
+    return num_rolls
     # END PROBLEM 10
 
 
@@ -297,7 +391,7 @@ def final_strategy(score, opponent_score):
     """
     # BEGIN PROBLEM 10
     "*** REPLACE THIS LINE ***"
-    return 6  # Replace this statement
+    return 6
     # END PROBLEM 10
 
 
