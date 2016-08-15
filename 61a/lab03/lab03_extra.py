@@ -10,6 +10,8 @@ def skip_mul(n):
     """
     if n == 0:
         return 0
+    elif n == 1:
+        return 1
     else:
         return n * skip_mul(n - 2)
 
@@ -25,6 +27,9 @@ def count_up(n):
     """
     def counter(i):
         "*** YOUR CODE HERE ***"
+        print(i)
+        if i < n:
+            counter(i+1)
     counter(1)
 
 def gcd(a, b):
@@ -41,6 +46,12 @@ def gcd(a, b):
     40
     """
     "*** YOUR CODE HERE ***"
+    a = max(a,b)
+    b = min(a,b)
+    if a % b == 0:
+        return b
+    else:
+        return gcd(b, a%b)
 
 def ab_plus_c(a, b, c):
     """Computes a * b + c.
@@ -96,7 +107,7 @@ def sort(lst):
     [3]
     >>> sort([])
     []
-    """ 
+    """
     "*** YOUR CODE HERE ***"
 
 def interleaved_sum(n, odd_term, even_term):
@@ -122,7 +133,7 @@ def ten_pairs(n):
     "*** YOUR CODE HERE ***"
 
 def is_prime(n):
-    """Returns True if n is a prime number and False otherwise. 
+    """Returns True if n is a prime number and False otherwise.
 
     >>> is_prime(2)
     True
