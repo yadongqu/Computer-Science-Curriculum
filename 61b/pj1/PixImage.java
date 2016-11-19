@@ -129,7 +129,7 @@ public class PixImage {
    * @return a String representation of this PixImage.
    */
   public String toString() {
-    // Replace the following line with your solution.
+    // Replace the following line with your solution. 
     return "I am a " + width + " x " + height +  " size image";
   }
 
@@ -170,9 +170,9 @@ public class PixImage {
     PixImage newImage = new PixImage(this.width, this.height);
     for(int i = 0; i < this.width; i++){
       for (int j = 0; j < this.height; j++){
-        System.out.println(this.getAverage(i,j).red);
-        newImage.colors[i][j] = this.getAverage(i, j);
-
+        newImage.setPixel(i, j, this.getAverage(i, j).red, 
+                                this.getAverage(i, j).green, 
+                                this.getAverage(i, j).blue);
       }
     }
     return newImage;
@@ -218,9 +218,9 @@ public class PixImage {
       sum.add(this.colors[x][y-1]);
       neighbors += 1;
     }
-    // System.out.println(neighbors);
-    // System.out.println(sum.red);
-
+   
+    // 
+    
     return new Color((short)(sum.red/neighbors),(short)(sum.green/neighbors), (short)(sum.blue/neighbors));
    
   }
